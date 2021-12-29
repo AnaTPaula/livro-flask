@@ -1,12 +1,16 @@
 import os
 
 
+#mysql -u root -p -e "CREATE DATABASE livroflask CHARACTER SET UTF8 collate utf8_general_ci;"
+
 class Config:
     CSRF_ENABLE = True  # Habilita o uso de criptografia no flask
     SECRET = 'AOPYU76%#AS'
     TEMPLATE_FOLDER = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates')
     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
     APP = None  # Receberá as propriedades do app
+
+    SQLALCHEMY_DATABASE_URI = 'mysql+mysqldb://root:root@localhost:3306/livroflask'
 
 
 class DevelopmentConfig(Config):
