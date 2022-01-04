@@ -1,5 +1,6 @@
-from flask import Flask, request
+from flask import Flask, request, redirect, render_template
 from flask_sqlalchemy import SQLAlchemy
+from controller.user import UserController
 
 # config import
 from config import app_config, app_active
@@ -29,26 +30,30 @@ def create_app(config_name):
     def recovery_password():
         return 'Aqui entrará a tela de recuperar senha'
 
-    @app.route('/profile/<int:user_id>/action/<action>/')
-    def profile(user_id, action):
-        if action == 'action1':
-            return f'Ação1 {action} usuário de ID {user_id}'
-        elif action == 'action2':
-            return f'Ação2 {action} usuário de ID {user_id}'
+    @app.route('/recovery-password/', methods=['POST'])
+    def send_recovery_password():
+        user = UserController()
+
+        result = user.recovery(request.form['email'])
+
+        if result:
+            return render_template('recovery.html', data={'status': 200, 'msg': 'Email de recuperação'
+                                                                                'enviado com sucesso'})
         else:
-            return f'Ação default for userId {user_id}'
+            return render_template('recovery.html', data={'status': 401, 'msg': 'Erro ao enviar e-mail'
+                                                                                'de recuperação'})
 
-    @app.route('/profile/', methods=['POST'])
-    def create_profile():
-        username = request.form['username']
+    @app.route('/login/', methods=['POST'])
+    def login_post():
+        user = UserController()
+        email = request.form['email']
         password = request.form['password']
-        return f'Essa rota possui um método POST e criará um usuário com os dados de usuário {username} e senha ' \
-               f'{password}'
+        result = user.login(email=email, password=password)
 
-    @app.route('/profile/<int:id>', methods=['PUT'])
-    def edit_total_profile(id):
-        username = request.form['username']
-        password = request.form['password']
-        return f'PUT username: {username}, password: {password}'
+        if result:
+            return redirect('/admin')
+        else:
+            return render_template('login.html', data={'status': 401, 'msg': 'Dados de usuario incorretos',
+                                                       'type': None})
 
     return app
