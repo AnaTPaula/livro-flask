@@ -20,10 +20,10 @@ class User(db.Model):
     recovery_code = db.Column(db.String(200), nullable=True)
     active = db.Column(db.Boolean(), default=1, nullable=True)
     role = db.Column(db.Integer, db.ForeignKey(Role.id), nullable=False)
-    fuction = relationship(Role)
+    function = relationship(Role)
 
     def __repr__(self):
-        return f'{sel.id}' - {self.username}
+        return f'{self.id} - {self.username}'
 
     def get_user_by_email(self):
         return ''

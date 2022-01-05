@@ -1,18 +1,20 @@
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-from admin.views import UserView
+from admin.views import UserView, HomeView
 
 from model.category import Category
 from model.product import Product
 from model.role import Role
 from model.user import User
+from flask_admin.menu import MenuLink
 
 
 def start_views(app, db):
-    admin = Admin(app, name='Meu Estoque', template_mode='bootstrap3')
+    admin = Admin(app, name='Meu Estoque', base_template='admin/base.html', template_mode='bootstrap3', index_view=HomeView())
 
     admin.add_view(ModelView(Role, db.session, "Funções", category="Usuários"))
     admin.add_view(UserView(User, db.session, "Usuários", category="Usuários"))
     admin.add_view(ModelView(Category, db.session, 'Categorias', category="Produtos"))
     admin.add_view(ModelView(Product, db.session, "Produtos", category="Produtos"))
+    admin.add_link(MenuLink(name='Logout', url='/logout'))
 

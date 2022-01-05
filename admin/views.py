@@ -1,9 +1,35 @@
 from flask_admin.contrib.sqla import ModelView
+from flask_admin import AdminIndexView, expose
 from config import app_config, app_active
 config = app_config[app_active]
 
-class UserView(ModelView):
+class HomeView(AdminIndexView):
+    @expose('/')
+    def index(self):
+        return self.render('home_admin.html', data={'username': 'aterezinha'})
 
+class UserView(ModelView):
+    column_labels = {
+        'function': 'Função',
+        'username': 'Usuário',
+        'email': 'E-mail',
+        'date_created': 'Data de Criação',
+        'last_update': 'Ultima Atualização',
+        'active': 'Ativação',
+        'Password': 'Senha'
+
+    }
+
+    column_descriptions = {
+        'function': 'Função no painel administrativo',
+        'username': 'Nome de usuário no sistema',
+        'email': 'Email do usuário do sistema',
+        'date_created': 'Data de ciração do usuário do sistema',
+        'last_update': 'Ultima atualização desse usuário no sistema',
+        'active': 'Estado ativo ou inativo no sistema',
+        'password': 'Senha do usuário no sistema'
+
+    }
     column_exclude_list = ['password', 'recovery_code']
     form_excluded_columns = ['last_update', 'recovery_code']
 
@@ -12,6 +38,20 @@ class UserView(ModelView):
             'type': 'password'
         }
     }
+
+    can_set_page_size = True
+    can_view_details = True
+    column_searchable_list = ['username', 'email']
+    column_filters = ['username', 'email', 'function']
+    column_editable_list = ['username', 'email', 'function', 'active']
+    create_modal = True
+    edit_modal = True
+    can_export = True
+    column_sortable_list = ['username']
+    column_default_sort = ('username', True)
+    column_details_exclude_list = ['password', 'recovery_code']
+    column_export_exclude_list = ['password', 'recovery_code']
+    export_types = ['json','yaml', 'csv', 'xls', 'df']
 
     def on_model_change(self, form, User, is_created):
         if 'password' in form:
