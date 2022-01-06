@@ -1,7 +1,8 @@
 from flask import Flask, request, redirect, render_template
 from flask_sqlalchemy import SQLAlchemy
-from controller.user import UserController
+from controller.product import ProductController
 from admin.admin import start_views
+from controller.user import UserController
 
 # config import
 from config import app_config, app_active
@@ -61,5 +62,18 @@ def create_app(config_name):
         else:
             return render_template('login.html', data={'status': 401, 'msg': 'Dados de usuario incorretos',
                                                        'type': None})
+
+    @app.route('/product', methods=['POST'])
+    def save_products():
+        product = ProductController()
+
+        result = product.save_product(request.form)
+
+        if result:
+            message = "Inserido"
+        else:
+            message = "Não inserido"
+
+        return message
 
     return app

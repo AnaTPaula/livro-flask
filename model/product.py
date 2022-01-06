@@ -24,3 +24,22 @@ class Product(db.Model):
     user = relationship(User)
     cat = relationship(Category)
 
+    def get_all(self):
+        try:
+            res = db.session.query(Product).all()
+        except Exception as e:
+            res = []
+            print(e)
+        finally:
+            db.session.close()
+        return res
+
+    def save (self):
+        try:
+            db.session.add(self)
+            db.session.commit()
+            return True
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+            return False
