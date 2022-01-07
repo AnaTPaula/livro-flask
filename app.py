@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from controller.product import ProductController
 from admin.admin import start_views
 from controller.user import UserController
+from flask_bootstrap import Bootstrap
 
 # config import
 from config import app_config, app_active
@@ -23,6 +24,7 @@ def create_app(config_name):
 
     db = SQLAlchemy(config.APP)
     start_views(app,db)
+    Bootstrap(app)
     db.init_app(app)
 
     @app.route('/')
@@ -31,7 +33,7 @@ def create_app(config_name):
 
     @app.route('/login/')
     def login():
-        return 'Aqui entrará a tela de login'
+        return render_template('login.html')
 
     @app.route('/recovery-password/')
     def recovery_password():
