@@ -76,4 +76,17 @@ def create_app(config_name):
 
         return message
 
+    @app.route('/product', methods=['PUT'])
+    def update_products():
+        product = ProductController()
+        result = product.update_product(request.form)
+
+        if result:
+            message = "Editado"
+        else:
+            message = "Não editado"
+
+        return message
+
+
     return app

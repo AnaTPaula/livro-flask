@@ -43,3 +43,15 @@ class Product(db.Model):
             print(e)
             db.session.rollback()
             return False
+
+    def update (self,obj):
+        try:
+            db.session.query(Product).filter(Product.id == self.id).update(obj)
+            db.session.commit()
+            return True
+        except Exception as e:
+            print(e)
+            db.session.rollback()
+            return False
+
+
