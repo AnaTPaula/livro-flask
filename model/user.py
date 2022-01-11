@@ -1,10 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
+from passlib.hash import pbkdf2_sha256
+from sqlalchemy import func
+from sqlalchemy.orm import relationship
 
 from config import app_config, app_active
 from model.role import Role
-from passlib.hash import pbkdf2_sha256
-
-from sqlalchemy.orm import relationship
 
 config = app_config[app_active]
 db = SQLAlchemy(config.APP)
@@ -48,3 +48,13 @@ class User(db.Model):
             return pbkdf2_sha256.verify(password_no_hash, password_database)
         except ValueError:
             return False
+
+    def get_total_users(self):
+        try:
+            res = db.session.query(func.count(User.id)).first()
+        except Exception as e:
+            res = []
+            print(e)
+        finally:
+            db.session.close()
+            return res

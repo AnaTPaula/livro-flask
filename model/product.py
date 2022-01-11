@@ -5,6 +5,8 @@ from config import app_config, app_active
 from model.user import User
 from model.category import Category
 
+from sqlalchemy import func
+
 config = app_config[app_active]
 db = SQLAlchemy(config.APP)
 
@@ -54,4 +56,22 @@ class Product(db.Model):
             db.session.rollback()
             return False
 
+    def get_total_products(self):
+        try:
+            res = db.session.query(func.count(Product.id)).first()
+        except Exception as e:
+            res = []
+            print(e)
+        finally:
+            db.session.close()
+            return res
 
+    def get_last_products(self):
+        try:
+            res = db.session.query(Product).order_by(Product.date_created).limit(5).all()
+        except Exception as e:
+            res = []
+            print(e)
+        finally:
+            db.session.close()
+            return res
