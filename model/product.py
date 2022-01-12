@@ -1,11 +1,10 @@
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from sqlalchemy.orm import relationship
 
 from config import app_config, app_active
-from model.user import User
 from model.category import Category
-
-from sqlalchemy import func
+from model.user import User
 
 config = app_config[app_active]
 db = SQLAlchemy(config.APP)
@@ -17,7 +16,7 @@ class Product(db.Model):
     description = db.Column(db.Text(), nullable=False)
     qtd = db.Column(db.Integer, default=0, nullable=True)
     image = db.Column(db.Text(), nullable=True)
-    price = db.Column(db.Numeric(10,2), nullable=False)
+    price = db.Column(db.Numeric(10, 2), nullable=False)
     date_created = db.Column(db.DateTime(6), default=db.func.current_timestamp(), nullable=False)
     last_update = db.Column(db.DateTime(6), onupdate=db.func.current_timestamp(), nullable=False)
     status = db.Column(db.Boolean(), default=1, nullable=True)
@@ -26,9 +25,12 @@ class Product(db.Model):
     user = relationship(User)
     cat = relationship(Category)
 
-    def get_all(self):
+    def get_all(self, limit=None):
         try:
-            res = db.session.query(Product).all()
+            if limit is None:
+                res = db.session.query(Product).all()
+            else:
+                res = db.session.query(Product).order_by(Product.date_created).limit(limit).all()
         except Exception as e:
             res = []
             print(e)
@@ -36,7 +38,18 @@ class Product(db.Model):
             db.session.close()
         return res
 
-    def save (self):
+    def get_product_by_id(self):
+        try:
+            res = db.session.query(Product).filter(Product.id == self.id).first()
+
+        except Exception as e:
+            res = []
+            print(e)
+        finally:
+            db.session.close()
+        return res
+
+    def save(self):
         try:
             db.session.add(self)
             db.session.commit()
@@ -46,7 +59,7 @@ class Product(db.Model):
             db.session.rollback()
             return False
 
-    def update (self,obj):
+    def update(self, obj):
         try:
             db.session.query(Product).filter(Product.id == self.id).update(obj)
             db.session.commit()
