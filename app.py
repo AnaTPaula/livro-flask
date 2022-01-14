@@ -8,12 +8,15 @@ from admin.admin import start_views
 from config import app_config, app_active
 from controller.product import ProductController
 from controller.user import UserController
+from flask_login import LoginManager, login_user, logout_user
 
 config = app_config[app_active]
 
 
 def create_app(config_name):
     app = Flask(__name__, template_folder='templates')
+    login_manager = LoginManager()
+    login_manager.init_app(app)
     app.secret_key = config.SECRET
     app.config.from_object(app_config[config_name])
     app.config.from_pyfile('config.py')
@@ -55,11 +58,11 @@ def create_app(config_name):
 
     @app.route('/login/')
     def login():
-        return render_template('login.html')
+        return render_template('login.html', data={'status': 200, 'msg': None, 'type': None})
 
     @app.route('/recovery-password/')
     def recovery_password():
-        return 'Aqui entrará a tela de recuperar senha'
+        return 'Aqui entrará a +tela de recuperar senha'
 
     @app.route('/recovery-password/', methods=['POST'])
     def send_recovery_password():
@@ -82,10 +85,14 @@ def create_app(config_name):
         result = user.login(email=email, password=password)
 
         if result:
-            return redirect('/admin')
+            if result.role == 4:
+                return render_template('login.html', data={'status': 401, 'msg': 'Permissão negada', 'type': 2})
+            else:
+                login_user(result)
+                return redirect('/admin')
         else:
             return render_template('login.html', data={'status': 401, 'msg': 'Dados de usuario incorretos',
-                                                       'type': None})
+                                                       'type': 1})
 
     @app.route('/product', methods=['POST'])
     def save_products():
@@ -174,5 +181,15 @@ def create_app(config_name):
             response['message'] = 'Login autorizado'
             response['result'] = result
         return Response(json.dumps(response, ensure_ascii=False), mimetype='application/json'), code, header
+
+    @app.route('/logout')
+    def logout_send():
+        logout_user()
+        return render_template('login.html', data={'status': 200, 'msg': 'Logout successfully', 'type': 3})
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        user = UserController()
+        return user.get_admin_login(user_id)
 
     return app
